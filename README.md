@@ -1,188 +1,190 @@
-# Nyaay AI Bias Auditing Platform
+# Nyaay
 
-Nyaay is a full-stack AI bias auditing prototype for India. It stress-tests algorithmic decision systems by generating synthetic applicant twins that are identical in merit but vary across Indian demographic dimensions such as caste-linked surnames, religion proxies, region, pincode and gender. The platform produces dashboards, statistical audit evidence, remediation guidance and compliance-ready reports.
+> India-native AI bias auditor. Counterfactual twin tests for caste, religion, regional, and gender bias in algorithmic decision systems.
 
-This build follows the Solution Challenge prototype deck and PRD: a professional glassmorphism interface, Firebase-backed auth/data/storage architecture, Express API layer and FastAPI bias-analysis microservice.
+Built for **Google Solution Challenge 2026** — problem statement *Unbiased AI Decision*.
 
-## Authentication
+---
 
-Nyaay now uses **Clerk** for authentication. Add your Clerk publishable key to `frontend/.env`:
+## Why this exists
 
-```env
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
-```
+The fairness libraries everyone uses today — **IBM AIF360, Microsoft Fairlearn, Google What-If Tool** — encode US protected attributes (race, age, gender). They have no native concept of caste, no understanding of pincode-as-religion-proxy, no Indian language fluency signal.
 
-If the key is missing, the prototype uses a local demo login so the UI can still run during judging or development.
+Nyaay is built around those.
 
-## Google Services Used
+It generates *counterfactual twin* applicant pairs — identical in merit but differing on a single demographic signal (caste-linked surname, religion-via-pincode proxy, region, language, or gender) — sends both to the target AI model, and measures the decision divergence with statistical confidence.
 
-- **Cloud Firestore**: persistence for users, uploads, audits, results, remediations and report metadata.
-- **Firebase Storage**: secure CSV/XLS/XLSX upload storage for historical decision data.
-- **Firebase Hosting**: optional static hosting for the Vite frontend.
+Output: defensible compliance evidence mapping to **DPDP Act 2023, RBI Fair Practices Code, and EU AI Act Article 10**.
 
-These services keep the MVP deployable on Google's free or low-cost tiers while satisfying the hackathon requirement for Google service integration. Clerk is used specifically for auth because it is faster to configure for polished hackathon SSO and organisation workflows.
+---
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  User[Auditor / Compliance Officer] --> Frontend[React + Vite Frontend]
-  Frontend --> Auth[Clerk Authentication]
-  Frontend --> Storage[Firebase Storage]
-  Frontend --> API[Node.js Express API]
-  API --> Firestore[Cloud Firestore]
-  API --> Storage
-  API --> ML[FastAPI ML Service]
-  ML --> Engine[Bias Engine + Twin Generator]
-  ML --> API
-  API --> Frontend
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Auditor / Compliance Officer (browser)                          │
+└────────────────────────────┬─────────────────────────────────────┘
+                             │
+┌────────────────────────────▼─────────────────────────────────────┐
+│  Frontend  ·  React 18 + Vite + Tailwind + Framer Motion         │
+│  Deployed on Vercel                                              │
+└──────┬──────────────────────────────────────┬───────────────────┘
+       │                                      │
+┌──────▼──────────┐                ┌──────────▼──────────────────┐
+│ Clerk SSO       │                │ Backend API · Express        │
+│ (Google login)  │                │ Firebase Admin SDK           │
+└─────────────────┘                └────┬─────────────────────────┘
+                                        │
+              ┌─────────────────────────┼──────────────────────────┐
+              │                         │                          │
+   ┌──────────▼──────────┐  ┌───────────▼────────────┐  ┌─────────▼──────────┐
+   │ Cloud Firestore     │  │ ML Service · FastAPI   │  │ Target Model APIs  │
+   │ Firebase Storage    │  │ Twin Generator         │  │ - Ollama (local)   │
+   │ Firebase Auth       │  │ Statistical Engine     │  │ - Gemini API       │
+   │ (Google Cloud)      │  │ pandas · numpy · scipy │  │ - Custom endpoint  │
+   └─────────────────────┘  └────────────────────────┘  └────────────────────┘
 ```
 
-## Project Structure
+---
 
-```text
+## Project structure
+
+```
 nyaay/
-  frontend/      React, Vite, TailwindCSS, Framer Motion, Recharts
-  backend/       Node.js, Express, Firebase Admin SDK
-  ml-service/    FastAPI, pandas/numpy/scipy style bias computation
-  firebase.json  Firebase Hosting, Firestore and Storage config
+├── frontend/              React + Vite + Tailwind + Framer Motion + Recharts
+├── backend/               Node.js + Express + Firebase Admin SDK
+├── ml-service/            FastAPI + pandas + numpy + scipy
+├── firebase.json          Firebase Hosting / Firestore / Storage rules config
+├── firestore.rules        Firestore access rules
+└── storage.rules          Storage access rules
 ```
 
-## Setup
+---
+
+## Quick start
 
 ### Frontend
-
 ```bash
-cd nyaay/frontend
+cd frontend
 npm install
-npm run dev
+npm run dev          # http://localhost:5173
 ```
 
-Create `frontend/.env` for real Firebase credentials:
-
+Optional `frontend/.env`:
 ```env
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_STORAGE_BUCKET=
-VITE_FIREBASE_MESSAGING_SENDER_ID=
-VITE_FIREBASE_APP_ID=
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 VITE_API_BASE=http://localhost:8080/api
-VITE_CLERK_PUBLISHABLE_KEY=
 ```
-
-### Upload Bias Check
-
-The `/upload` page parses CSV, XLS and XLSX files in the browser. Map the model's decision column plus any available proxy columns:
-
-- name/surname for caste or religion proxy checks
-- pincode for region or religion proxy checks
-- gender for gender checks
-
-The prototype calculates approval-rate disparity between groups. When it finds a biased division, it reruns a counterfactual estimate by changing that division to the most common reference group and shows how many decisions would likely change. That demonstrates whether the model's historical decisions appear sensitive to the protected/proxy field.
-
-You can also add custom bias fields during mapping. For example, if your file contains `school_board`, `college_tier`, `language`, `city`, `employment_type` or any domain-specific field, add it as a custom dimension and Nyaay will group outcomes by that column.
-
-### Live AI Audit
-
-The `/live-audit` page tests a live model with custom fields:
-
-1. Define the field schema the target model needs.
-2. Pick one protected/proxy field to change.
-3. Generate a common/reference applicant and a counterfactual twin.
-4. Send both payloads to the model.
-5. Compare decisions.
-
-For Ollama-backed local testing, install Ollama, pull a model, and run the backend:
-
-```powershell
-ollama pull llama3.1
-ollama serve
-```
-
-Then set these in `backend/.env` if you want non-default values:
-
-```env
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.1
-```
-
-For any other AI provider, use **Custom API** on `/live-audit`:
-
-1. Paste the provider endpoint.
-2. Add headers as JSON.
-3. Add the request body template.
-4. Set the response text path.
-
-The template supports:
-
-```text
-{{prompt}}
-{{profileJson}}
-```
-
-For Gemini-style APIs, the default request template and response path are already shaped for `generateContent`. For a company model API, set the endpoint and body to whatever that API expects.
+If `VITE_CLERK_PUBLISHABLE_KEY` is missing, the prototype falls back to a local demo login so the UI still runs.
 
 ### Backend
-
 ```bash
-cd nyaay/backend
+cd backend
 npm install
-$env:ALLOW_DEMO_AUTH="true"
-npm run dev
+npm run dev          # http://localhost:8080
 ```
 
-For production, set:
-
+`backend/.env`:
 ```env
+ALLOW_DEMO_AUTH=true
+PORT=8080
+CORS_ORIGIN=http://localhost:5173
+ML_SERVICE_URL=http://localhost:8000
+
+# Optional — only if auditing against Ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+
+# Optional — production Firebase + Clerk
 CLERK_SECRET_KEY=
 CLERK_PUBLISHABLE_KEY=
 FIREBASE_PROJECT_ID=
 FIREBASE_STORAGE_BUCKET=
 FIREBASE_SERVICE_ACCOUNT_JSON=
-ML_SERVICE_URL=http://localhost:8000
-CORS_ORIGIN=http://localhost:5173
 ```
 
 ### ML Service
-
 ```bash
-cd nyaay/ml-service
+cd ml-service
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\activate           # Windows
+# source .venv/bin/activate      # macOS / Linux
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-## Core Routes
+### Auditing against Ollama (local Llama)
+```bash
+ollama pull llama3.2
+ollama serve
+```
+Then open `/live-audit` in the frontend, choose **Ollama** as the provider, define your schema, and run a twin test.
 
-- `/` Landing page
-- `/auth` Login and registration
-- `/dashboard` Audit overview
-- `/upload` Upload, map and validate decision data
-- `/configure` Configure and launch audit
-- `/results/:auditId` Statistical findings and raw twin outcomes
-- `/remediation/:auditId` Fix guidance and resolution tracking
-- `/reports` Compliance report preview and PDF export
-- `/monitor` Continuous monitoring trends
-- `/settings` Organisation profile and API key surface
+### Auditing against Gemini / OpenAI / Claude / custom models
+Use the **Custom API** provider on `/live-audit`. Paste the endpoint, headers JSON, request body template, and response text path. Placeholders `{{prompt}}` and `{{profileJson}}` are interpolated at request time.
 
-## API Overview
+---
 
-- `POST /api/auth/register`
-- `POST /api/auth/verify`
-- `POST /api/uploads`
-- `GET /api/uploads/:uploadId`
-- `POST /api/audits`
-- `GET /api/audits`
-- `GET /api/audits/:id`
-- `PATCH /api/audits/:id`
-- `POST /api/audits/:id/run`
-- `GET /api/audits/:id/results`
-- `POST /api/reports/:auditId/export`
+## Tech stack
 
-## Team Details
+| Layer | Stack |
+|---|---|
+| Frontend | React 18, Vite, Tailwind CSS, Framer Motion, Recharts, Lucide, Clerk |
+| Backend | Node.js, Express, Firebase Admin SDK |
+| ML service | FastAPI, pandas, NumPy, SciPy |
+| AI / target models | Gemini API (`google-genai`), Ollama (Llama 3.2 / 3.1 / Phi-3), OpenAI / Anthropic / custom HTTP |
+| Cloud | Vercel (frontend), Cloud Firestore, Firebase Storage, Firebase Auth |
+| Auth | Clerk SSO (Google) with Firebase Auth fallback |
+| Reports | jsPDF, html2canvas, xlsx |
 
-- Team name: Nyaay
-- Problem statement: Unbiased AI Decision
-- Prototype focus: India-native AI bias auditing with synthetic twins, statistical proof and compliance reporting.
+---
+
+## Routes
+
+| Path | Purpose |
+|---|---|
+| `/` | Landing — animated twin-divergence demo |
+| `/auth` | Clerk login + register (demo fallback) |
+| `/dashboard` | Audit overview, severity heatmap, activity feed |
+| `/upload` | CSV/XLS upload, column mapping, counterfactual disparity check |
+| `/configure` | Configure and launch a full audit |
+| `/results/:auditId` | Statistical findings, twin-diff hero, raw twin pairs |
+| `/remediation/:auditId` | Prioritised fix list with effort × impact |
+| `/reports` | Compliance report preview, PDF / JSON / CSV export |
+| `/monitor` | Continuous drift monitor, audit history |
+| `/live-audit` | Real-time twin test against any AI model |
+| `/settings` | Organisation profile, API keys |
+
+---
+
+## Solution Challenge alignment
+
+| Requirement | How Nyaay meets it |
+|---|---|
+| Cloud deployment | Frontend deployed on Vercel; Firestore + Storage on Google Cloud |
+| Google AI / service | Gemini API integration via `/live-audit`; Cloud Firestore, Firebase Storage, Firebase Auth |
+| Real-world problem | Algorithmic discrimination by Indian decision-system AI (lending, hiring, insurance, rentals) |
+| Working prototype | Live `/live-audit` runs counterfactual twin tests against Ollama and any custom endpoint |
+
+---
+
+## Methodology — what we are honest about
+
+- The **counterfactual twin** approach has known limitations around path-specific causal effects and mediator confounding. We treat it as evidence, not proof.
+- Statistical significance requires sample sizes Nyaay can hit at scale (1k–10k twins) — single-digit pilots are illustrative, not conclusive.
+- The Indian Bias Layer (54 surnames × 12 communities, 20 pincodes × 17 cities in the seed dataset) is sufficient to demonstrate the methodology; production use requires expansion to thousands of validated entries.
+- DPDP / RBI / EU AI Act mappings in the report layer are aligned to the specific articles; the engine flags risks against the relevant control text but does not provide legal advice.
+
+---
+
+## License
+
+- Code: **MIT**
+- Indian Bias Layer dataset: **CC-BY-4.0**
+
+---
+
+## Team
+
+- **Nyaay** · solo build · Solution Challenge 2026
+- Problem statement: *Unbiased AI Decision*
