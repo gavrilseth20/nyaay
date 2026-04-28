@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+**/dist/
+build/
+.vite/
+.next/
+.cache/
+
+# Environment & secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+serviceAccount*.json
+service-account*.json
+firebase-adminsdk-*.json
+credentials*.json
+
+# Python (ml-service)
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Firebase / Google Cloud
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+.firebaserc.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Local data / runs
+*.csv.local
+audit_results.csv.tmp
+ml-service/data/cache/
+
+# Claude Code session metadata
+.claude/worktrees/
+.claude/settings.local.json
+.claude/.session/

@@ -1,0 +1,280 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --bg-primary: #070B17;
+  --bg-secondary: #0B1226;
+  --bg-tertiary: #0F1830;
+  --ink-primary: #F4F1EA;
+  --ink-secondary: #C4CCDA;
+  --ink-muted: #7A8699;
+  --saffron: #FF9933;
+  --saffron-deep: #F08220;
+  --midnight: #101D3F;
+  --critical: #FF5466;
+  --pass: #3DD68C;
+  --line: rgba(255,255,255,0.08);
+  --line-strong: rgba(255,255,255,0.14);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--ink-primary);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: rgba(255,153,51,0.32); color: #FFF8F0; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.06);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,153,51,0.32); background-clip: padding-box; }
+
+/* App-wide ambient backdrop. Replaces the old .dot-grid. */
+.aurora {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(255,153,51,0.10), transparent 38%),
+    radial-gradient(ellipse at 88% 22%, rgba(94,160,255,0.10), transparent 36%),
+    radial-gradient(ellipse at 50% 95%, rgba(61,214,140,0.06), transparent 40%),
+    var(--bg-primary);
+}
+.aurora::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 80%);
+  pointer-events: none;
+}
+.aurora > * { position: relative; }
+
+/* Backwards compatible: old pages still reference .dot-grid */
+.dot-grid {
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(255,153,51,0.10), transparent 38%),
+    radial-gradient(ellipse at 88% 22%, rgba(94,160,255,0.10), transparent 36%),
+    radial-gradient(ellipse at 50% 95%, rgba(61,214,140,0.06), transparent 40%),
+    var(--bg-primary);
+  position: relative;
+}
+.dot-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+.dot-grid > * { position: relative; z-index: 1; }
+
+/* Glass surfaces */
+.glass {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%);
+  backdrop-filter: blur(18px) saturate(115%);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,153,51,0.18), rgba(255,255,255,0.04) 30%, rgba(94,160,255,0.18) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.glass-flat {
+  background: rgba(255,255,255,0.035);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+/* Typography helpers */
+.label {
+  color: var(--ink-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #FFCD96;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border: 1px solid rgba(255,153,51,0.28);
+  background: rgba(255,153,51,0.08);
+  border-radius: 999px;
+}
+.eyebrow::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--saffron);
+  box-shadow: 0 0 10px var(--saffron);
+}
+
+.serif { font-family: Fraunces, ui-serif, Georgia, serif; font-feature-settings: "ss01"; }
+.mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+/* Inputs */
+.input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  padding: 12px 14px;
+  color: var(--ink-primary);
+  outline: none;
+  font-size: 14px;
+  transition: all 180ms ease;
+}
+.input::placeholder { color: var(--ink-muted); }
+.input:hover { border-color: rgba(255,255,255,0.18); }
+.input:focus {
+  border-color: rgba(255,153,51,0.55);
+  box-shadow: 0 0 0 4px rgba(255,153,51,0.14);
+  background: rgba(255,255,255,0.06);
+}
+
+select.input { color: var(--ink-primary); cursor: pointer; }
+select.input option { background: #0B1226; color: #F4F1EA; }
+
+/* Subtle ring used on interactive cards */
+.ring-soft {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
+  transition: box-shadow 220ms ease, transform 220ms cubic-bezier(0.22,1,0.36,1);
+}
+.ring-soft:hover {
+  box-shadow: 0 0 0 1px rgba(255,153,51,0.45), 0 24px 60px rgba(0,0,0,0.55);
+  transform: translateY(-2px);
+}
+
+/* Severity bar — used in StatCard */
+.sev-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--saffron) 0%, #FF5466 100%);
+  box-shadow: 0 0 12px rgba(255,153,51,0.45);
+}
+
+/* Animated underline accent — used under section eyebrows */
+.accent-rule {
+  display: inline-block;
+  width: 40px;
+  height: 3px;
+  background: var(--saffron);
+  border-radius: 2px;
+  box-shadow: 0 0 12px rgba(255,153,51,0.55);
+}
+
+/* Number tabular */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Scan line shimmer for "live" indicators */
+.live-dot {
+  position: relative;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--pass);
+  box-shadow: 0 0 0 0 rgba(61,214,140,0.65);
+  animation: livePulse 2s infinite;
+}
+@keyframes livePulse {
+  0%   { box-shadow: 0 0 0 0 rgba(61,214,140,0.55); }
+  70%  { box-shadow: 0 0 0 10px rgba(61,214,140,0); }
+  100% { box-shadow: 0 0 0 0 rgba(61,214,140,0); }
+}
+
+/* Critical badge pulse */
+.critical-pulse {
+  position: relative;
+}
+.critical-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 1px solid rgba(255,84,102,0.55);
+  animation: criticalRing 1.6s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes criticalRing {
+  0%   { transform: scale(1);   opacity: 0.9; }
+  100% { transform: scale(1.18); opacity: 0;   }
+}
+
+/* Skeleton */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.035);
+  border-radius: 8px;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0;  }
+}
+
+/* Recharts overrides */
+.recharts-default-tooltip {
+  background: rgba(11,18,38,0.96) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5) !important;
+}
+.recharts-tooltip-label { color: #F4F1EA !important; font-weight: 600; }
+
+/* Safe utility classes for severity tones */
+.sev-critical-text { color: #FF7585; }
+.sev-high-text     { color: #FFB35F; }
+.sev-medium-text   { color: #F2C94C; }
+.sev-pass-text     { color: #3DD68C; }

@@ -1,0 +1,19 @@
+{
+  "name": "nyaay-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@clerk/express": "^2.1.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "firebase-admin": "^13.0.2",
+    "multer": "^2.0.2",
+    "node-fetch": "^3.3.2"
+  }
+}

@@ -1,0 +1,13 @@
+applicant_id,decision,name,pincode,gender,income,credit_score
+APP-1001,approved,Aarav Sharma,400001,male,920000,742
+APP-1002,approved,Kavya Verma,110001,female,880000,728
+APP-1003,rejected,Rahul Paswan,834001,male,910000,739
+APP-1004,rejected,Meera Meghwal,486001,female,870000,731
+APP-1005,approved,Imran Khan,400070,male,940000,746
+APP-1006,rejected,Sana Ansari,110006,female,890000,733
+APP-1007,approved,Vikram Iyer,560001,male,960000,751
+APP-1008,rejected,Neha Jadhav,770001,female,905000,740
+APP-1009,approved,Arjun Nair,600001,male,930000,744
+APP-1010,rejected,Ayesha Sheikh,380001,female,900000,736
+APP-1011,approved,Rohan Pillai,400001,male,970000,756
+APP-1012,rejected,Deepa Manjhi,831001,female,890000,730

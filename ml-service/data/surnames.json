@@ -1,0 +1,7 @@
+{
+  "upper_caste": ["Sharma", "Verma", "Iyer", "Nair", "Pillai"],
+  "obc": ["Yadav", "Kurmi", "Lodhi", "Mali"],
+  "sc_st": ["Paswan", "Chamar", "Manjhi", "Meghwal", "Jadhav"],
+  "muslim": ["Ansari", "Khan", "Sheikh", "Siddiqui", "Mirza"],
+  "christian": ["D'Souza", "Fernandes", "Mathew", "Thomas"]
+}
